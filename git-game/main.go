@@ -3,11 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 
 	tea "github.com/charmbracelet/bubbletea"
-
-	git "github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 type model struct {
@@ -24,16 +22,13 @@ func (e errMsg) Error() string { return e.err.Error() }
 
 func (mod model) Init() tea.Cmd {
 	// mod.commit_shas =
-	repo, err := git.PlainClone('.', false)
-
-	cIter, err := repo.Log(&git.LogOptions{})
-
-	// ... just iterates over the commits, printing it
-	err = cIter.ForEach(func(c *object.Commit) error {
-		fmt.Println(c)
-
+	cmd := exec.Command("git", "log", "--pretty=%H", "-z")
+	err := cmd.Run()
+	if err != nil {
+		mod.err = err
 		return nil
-	})
+	}
+
 	return nil
 }
 
